@@ -62,7 +62,10 @@ with tab_dashboard:
             color = "color: #EF5350; font-weight: bold;" if is_low else ""
             return [color if col == "物品名称" else "" for col in row.index]
 
-        styled_df = df.style.apply(highlight_low_stock, axis=1)
+        styled_df = df.style.apply(highlight_low_stock, axis=1).format({
+    "当前库存": "{:.0f}",
+    "安全库存": "{:.0f}"
+})
         st.subheader("库存明细表")
         st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
