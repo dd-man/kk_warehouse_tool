@@ -16,7 +16,7 @@ def get_categories():
     return conn.read(worksheet="Categories", ttl="0s").dropna(how="all")
 
 # --- 3. 页面布局 ---
-st.set_page_config(page_title="仓库助手专业版", layout="wide")
+st.set_page_config(page_title="寇博实验室助手专业版", layout="wide")
 st.title("📦 Lab Inventory Tracking System")
 
 # 顶部并列标签页
@@ -174,3 +174,4 @@ with tab_settings:
             conn.update(worksheet="Inventory", data=df_updated)
             st.error(f"🔥 {item_to_del} 已永久移除")
             st.rerun()
+
