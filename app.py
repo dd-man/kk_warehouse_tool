@@ -2,65 +2,17 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import plotly.express as px
+from streamlit_gsheets import GSheetsConnection
 
-# --------------------------------------------------------------
-# 1️⃣ 数据库初始化（版本升级至 v7）
-# --------------------------------------------------------------
-def init_db():
-    """
-    初始化/升级数据库结构（v7）
-    - inventory：新增 brand、item_no、spec、location 四个字段
-    - categories：仅保留唯一的分类名称
-    """
-    conn = sqlite3.connect('warehouse_v7.db', check_same_thread=False)
-    c = conn.cursor()
+# --- 1. 建立连接 ---
+conn = st.connection("gsheets", type=GSheetsConnection)
 
-    # 物品表（inventory）
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS inventory (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE,
-            category TEXT,
-            brand TEXT,
-            item_no TEXT,
-            spec TEXT,
-            location TEXT,
-            current_stock INTEGER,
-            safe_stock INTEGER,
-            unit TEXT
-        )
-    ''')
+# --- 2. 数据读取函数 ---
+def get_inventory():
+    return conn.read(worksheet="Inventory", ttl="0s") # ttl=0 确保实时刷新
 
-    # 分类表（categories）
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE
-        )
-    ''')
-
-    # 若分类表为空，写入默认分类
-    c.execute("SELECT COUNT(*) FROM categories")
-    if c.fetchone()[0] == 0:
-        default_cats = [("办公用品",), ("实验用品",), ("日常耗材",)]
-        c.executemany("INSERT INTO categories (name) VALUES (?)", default_cats)
-
-    conn.commit()
-    return conn
-
-conn = init_db()
-
-# --------------------------------------------------------------
-# 2️⃣ 数据库操作函数
-# --------------------------------------------------------------
-def get_data(table: str) -> pd.DataFrame:
-    """读取指定表的全部数据并返回 DataFrame"""
-    return pd.read_sql_query(f"SELECT * FROM {table}", conn)
-
-def run_query(query: str, params=()):
-    """执行写入类 SQL 语句（INSERT / UPDATE / DELETE）"""
-    with conn:
-        conn.execute(query, params)
+def get_categories():
+    return conn.read(worksheet="Categories", ttl="0s")
 
 # --------------------------------------------------------------
 # 3️⃣ 页面布局
@@ -293,3 +245,4 @@ with tab_settings:
             st.rerun()
     else:
         st.info("当前暂无物资记录")
+
