@@ -71,6 +71,10 @@ with tab_dashboard:
 
 # --- Tab 2: 领用入库 ---
 with tab_action:
+    # 显示 session_state 的消息提示
+if "msg" in st.session_state:
+    st.success(st.session_state["msg"])  # 若是错误可以用 st.error
+    del st.session_state["msg"]
     df = get_inventory()
     if not df.empty:
         st.subheader("快速库存变动")
