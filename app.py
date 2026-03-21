@@ -70,37 +70,37 @@ with tab_dashboard:
         st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
 # --- Tab 2: 领用入库 ---
-73| with tab_action:
-74|     # 显示 session_state 的消息提示
-75|     if "msg" in st.session_state:
-76|         st.success(st.session_state["msg"])  # 若是错误可以用 st.error
-77|         del st.session_state["msg"]
-78|     df = get_inventory()
-79|     if not df.empty:
-80|         st.subheader("快速库存变动")
-81|         item_name = st.selectbox("1️⃣ 选择物品", df["物品名称"].tolist())
-82|         num = st.number_input("2️⃣ 数量", min_value=1, value=1)
-83|         st.write("3️⃣ 确认操作")
-84|         col_in, col_out = st.columns(2)
-85|         # 入库
-86|         if col_in.button("📥 确认入库", use_container_width=True):
-87|             df.loc[df["物品名称"] == item_name, "当前库存"] += num
-88|             conn.update(worksheet="Inventory", data=df)
-89|             st.session_state["msg"] = f"✅ {item_name} 已增加 {num}"
-90|             st.rerun()
-91|         # 领用
-92|         if col_out.button("📤 确认领用", use_container_width=True):
-93|             current = df.loc[df["物品名称"] == item_name, "当前库存"].values[0]
-94|             if current >= num:
-95|                 df.loc[df["物品名称"] == item_name, "当前库存"] -= num
-96|                 conn.update(worksheet="Inventory", data=df)
-97|                 st.session_state["msg"] = f"✅ {item_name} 已领用 {num}"
-98|                 st.rerun()
-99|             else:
-100|                 st.session_state["msg"] = f"❌ 库存不足！当前仅剩 {current}"
-101|                 st.rerun()
-102|     else:
-103|         st.info("请先录入物资")
+ with tab_action:
+     # 显示 session_state 的消息提示
+     if "msg" in st.session_state:
+         st.success(st.session_state["msg"])  # 若是错误可以用 st.error
+         del st.session_state["msg"]
+     df = get_inventory()
+     if not df.empty:
+         st.subheader("快速库存变动")
+         item_name = st.selectbox("1️⃣ 选择物品", df["物品名称"].tolist())
+         num = st.number_input("2️⃣ 数量", min_value=1, value=1)
+         st.write("3️⃣ 确认操作")
+         col_in, col_out = st.columns(2)
+         # 入库
+         if col_in.button("📥 确认入库", use_container_width=True):
+             df.loc[df["物品名称"] == item_name, "当前库存"] += num
+             conn.update(worksheet="Inventory", data=df)
+             st.session_state["msg"] = f"✅ {item_name} 已增加 {num}"
+             st.rerun()
+         # 领用
+         if col_out.button("📤 确认领用", use_container_width=True):
+             current = df.loc[df["物品名称"] == item_name, "当前库存"].values[0]
+             if current >= num:
+                 df.loc[df["物品名称"] == item_name, "当前库存"] -= num
+                 conn.update(worksheet="Inventory", data=df)
+                 st.session_state["msg"] = f"✅ {item_name} 已领用 {num}"
+                 st.rerun()
+             else:
+                 st.session_state["msg"] = f"❌ 库存不足！当前仅剩 {current}"
+                 st.rerun()
+     else:
+         st.info("请先录入物资")
 
 # --- Tab 3: 新增用品 ---
 with tab_add:
