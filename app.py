@@ -79,22 +79,24 @@ with tab_action:
         st.write("3️⃣ 确认操作")
         col_in, col_out = st.columns(2)
 
-        if col_in.button("📥 确认入库", use_container_width=True):
-            # 逻辑：在内存中修改 df，然后整体推送到 Google Sheets
-            df.loc[df["物品名称"] == item_name, "当前库存"] += num
-            conn.update(worksheet="Inventory", data=df)
-            st.success(f"✅ {item_name} 已增加 {num}")
-            st.rerun()
+       # 入库
+if col_in.button("📥 确认入库", use_container_width=True):
+    df.loc[df["物品名称"] == item_name, "当前库存"] += num
+    conn.update(worksheet="Inventory", data=df)
+    st.session_state["msg"] = f"✅ {item_name} 已增加 {num}"
+    st.rerun()
 
-        if col_out.button("📤 确认领用", use_container_width=True):
-            current = df.loc[df["物品名称"] == item_name, "当前库存"].values[0]
-            if current >= num:
-                df.loc[df["物品名称"] == item_name, "当前库存"] -= num
-                conn.update(worksheet="Inventory", data=df)
-                st.success(f"✅ {item_name} 已领用 {num}")
-                st.rerun()
-            else:
-                st.error(f"❌ 库存不足！当前仅剩 {current}")
+# 领用
+if col_out.button("📤 确认领用", use_container_width=True):
+    current = df.loc[df["物品名称"] == item_name, "当前库存"].values[0]
+    if current >= num:
+        df.loc[df["物品名称"] == item_name, "当前库存"] -= num
+        conn.update(worksheet="Inventory", data=df)
+        st.session_state["msg"] = f"✅ {item_name} 已领用 {num}"
+        st.rerun()
+    else:
+        st.session_state["msg"] = f"❌ 库存不足！当前仅剩 {current}"
+        st.rerun()
     else:
         st.info("请先录入物资")
 
